@@ -1,9 +1,8 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\Rol;
-class RolesController extends Controller 
+class RolesController extends AppController 
 {
     function __construct() {
         parent::__construct();

@@ -1,10 +1,9 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\Compra;
 use \Clases\Pago;
-class PagosController extends Controller
+class PagosController extends AppController
 {
     function __construct() {
         parent::__construct();

@@ -1,10 +1,9 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\Marca;
 use \Clases\Modelo;
-class ModelosController extends Controller
+class ModelosController extends AppController
 {
     function __construct() {
         parent::__construct();

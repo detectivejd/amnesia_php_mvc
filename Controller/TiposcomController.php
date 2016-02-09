@@ -1,9 +1,8 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\TipoCompra;
-class TiposcomController extends Controller
+class TiposcomController extends AppController
 {
     function __construct() {
         parent::__construct();

@@ -1,10 +1,9 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\Rol;
 use \Clases\Usuario;
-class UsuariosController extends Controller
+class UsuariosController extends AppController
 {
     function __construct(){
         parent::__construct();

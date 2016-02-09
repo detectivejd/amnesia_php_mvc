@@ -1,9 +1,8 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \Clases\Vehiculo;
 include('./Lib/fpdf/FPDF.php');
-class PdfController extends Controller
+class PdfController extends AppController
 {
     private $pdf;
     function __construct() {

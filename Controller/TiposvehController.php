@@ -1,9 +1,8 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\TipoVehiculo;
-class TiposvehController extends Controller
+class TiposvehController extends AppController
 {
     function __construct() {
         parent::__construct();

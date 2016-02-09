@@ -1,12 +1,11 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Lib\Upload;
 use \Clases\TipoVehiculo;
 use \Clases\Modelo;
 use \Clases\Vehiculo;
-class VehiculosController extends Controller
+class VehiculosController extends AppController
 {
     private $upload;
     function __construct() {

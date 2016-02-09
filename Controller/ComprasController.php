@@ -1,12 +1,11 @@
 <?php
 namespace Controller;
-use \App\Controller;
 use \App\Session;
 use \Clases\TipoCompra;
 use \Clases\Usuario;
 use \Clases\Vehiculo;
 use \Clases\Compra;
-class ComprasController extends Controller
+class ComprasController extends AppController
 {
     function __construct() {
         parent::__construct();        
