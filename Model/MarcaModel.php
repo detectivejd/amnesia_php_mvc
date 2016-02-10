@@ -1,10 +1,9 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \App\Session;
 use \Clases\Marca;
-class MarcaModel extends Model
+class MarcaModel extends AppModel
 {
     function __construct() {
         parent::__construct();

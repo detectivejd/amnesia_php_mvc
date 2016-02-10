@@ -1,11 +1,10 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \App\Session;
 use \Clases\Modelo;
 use \Clases\Vehiculo;
-class VehiculoModel extends Model
+class VehiculoModel extends AppModel
 {
     private $mod_tv;
     private $mod_mar;

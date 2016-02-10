@@ -1,9 +1,8 @@
 <?php
 namespace Model;
 use \PDO;
-use App\Model;
 use Clases\Pago;
-class PagoModel extends Model
+class PagoModel extends AppModel
 {
     function __construct() {
         parent::__construct();

@@ -1,11 +1,10 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \Clases\Usuario;
 use \Clases\Vehiculo;
 use \Clases\Compra;
-class CompraModel extends Model
+class CompraModel extends AppModel
 {
     private $mod_r;
     private $mod_u;

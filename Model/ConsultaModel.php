@@ -1,10 +1,9 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \Clases\Compra;
 use \Clases\Pago;
-class ConsultaModel extends Model
+class ConsultaModel extends AppModel
 {
     function __construct() {
         parent::__construct();

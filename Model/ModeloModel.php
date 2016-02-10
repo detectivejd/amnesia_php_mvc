@@ -1,11 +1,10 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \App\Session;
 use \Clases\Marca;
 use \Clases\Modelo;
-class ModeloModel extends Model
+class ModeloModel extends AppModel
 {
     private $mod_mar;
     function __construct() {

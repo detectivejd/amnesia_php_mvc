@@ -1,10 +1,9 @@
 <?php
 namespace Model;
 use \PDO;
-use \App\Model;
 use \App\Session;
 use \Clases\TipoVehiculo;
-class TipovehModel extends Model
+class TipovehModel extends AppModel
 {
     function __construct() {
         parent::__construct();
