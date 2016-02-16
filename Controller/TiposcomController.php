@@ -18,10 +18,10 @@ class TiposcomController extends AppController
         if($this->checkUser()){
             if (isset($_POST['btnaceptar'])) {
                 if($this->checkDates()) { 
-                    $tc= new TipoCompra(0, $_POST['txtnom']);
+                    $tc= $this->createEntity();
                     $id = $tc->save();
                     Session::set("msg",(isset($id)) ? "Tipo de Compra Creada" : Session::get('msg'));
-                    header("Location:index.php?c=tiposcom&a=index");
+                    header("Location:index.php?b=backend&c=tiposcom&a=index");
                     exit();
                 }
             }
@@ -33,10 +33,10 @@ class TiposcomController extends AppController
             Session::set("id",$_GET['p']);
             if (Session::get('id')!=null && isset($_POST['btnaceptar'])){                             
                 if($this->checkDates()) {     
-                    $tc= new TipoCompra($_POST['hid'], $_POST['txtnom']);
+                    $tc= $this->createEntity();
                     $id = $tc->save();
                     Session::set("msg",(isset($id)) ? "Tipo de Compra Editada" : Session::get('msg'));
-                    header("Location:index.php?c=tiposcom&a=index"); 
+                    header("Location:index.php?b=backend&c=tiposcom&a=index"); 
                     exit();
                 }
             }
@@ -51,7 +51,7 @@ class TiposcomController extends AppController
                 $tc = (new TipoCompra())->findById($_GET['p']); 
                 $id = $tc->del($tc);
                 Session::set("msg", (isset($id)) ? "Tipo de Compra Borrada" : "No se pudo borrar el tipo");
-                header("Location:index.php?c=tiposcom&a=index");
+                header("Location:index.php?b=backend&c=tiposcom&a=index");
             }                           
         }
         else {
@@ -73,5 +73,11 @@ class TiposcomController extends AppController
     }
     protected function getTypeRole() {
         return "ADMIN";
+    }
+    protected function createEntity() {        
+        $obj = new TipoCompra();
+        $obj->setId(isset($_POST['hid']) ? $_POST['hid'] : 0);
+        $obj->setNombre($_POST['txtnom']);
+        return $obj;
     }
 }

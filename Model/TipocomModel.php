@@ -1,72 +1,68 @@
 <?php
 namespace Model;
-use \PDO;
-use \App\Session;
 use \Clases\TipoCompra;
 class TipocomModel extends AppModel
 {
     function __construct() {
         parent::__construct();
     }
-    public function find($criterio = null){
-        $sql="select * from tipo_compras";
-        $datos= array();
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute();
-        foreach($consulta->fetchAll(PDO::FETCH_ASSOC) as $row){
-            $tc = new TipoCompra($row['tcId'], $row['tcNombre']);
-            array_push($datos, $tc);
-        }
-        return $datos;
+    
+    public function createEntity($row) {
+        $obj = new TipoCompra();
+        $obj->setId($row['tcId']);
+        $obj->setNombre($row['tcNombre']);
+        return $obj;
     }
-    public function create($tc){
-        if($this->check($tc->getNombre())){
-            Session::set('msg', 'El Tipo de compra ya existe');
-            return null;
-        }
-        $sql="insert into tipo_compras(tcNombre) values(?)";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($tc->getNombre()));
-        return ($consulta->rowCount() > 0) ? $this->getBD()->lastInsertId() : null;
+
+    protected function getCheckMessage() {
+        return  'El Tipo de compra ya existe';
     }
-    public function update($tc){
-        $aux = $this->findById($tc->getId()); 
-        if(!$tc->equals($aux)){
-            if($this->check($tc->getNombre())){
-                Session::set('msg', 'El Tipo de compra ya existe');
-                return null;
-            }        
-        }
-        $sql="update tipo_compras set tcNombre=? where tcId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($tc->getNombre(),$tc->getId()));
-        return ($consulta->rowCount() > 0) ? $tc->getId() : null;
+
+    protected function getCheckParameter($unique) {
+        return [$unique->getNombre()];
     }
-    private function check($unique) { 
-        $query = 'SELECT tcId FROM tipo_compras WHERE tcNombre = ?'; 
-        $consulta = $this->getBD()->prepare($query); 
-        $consulta->execute([$unique]); 
-        // Indicar si hay algo en la base de datos con este nombre 
-        return $consulta->rowCount() > 0; 
+
+    protected function getCheckQuery() {
+        return 'SELECT tcId FROM tipo_compras WHERE tcNombre = ?';
     }
-    public function delete($tc, $notUsed = true){
+
+    protected function getCreateParameter($object) {
+        return array($object->getNombre());
+    }
+
+    protected function getCreateQuery() {
+        return "insert into tipo_compras(tcNombre) values(?)";
+    }
+
+    protected function getDeleteParameter($object) {
+        return array($object->getId());
+    }
+
+    protected function getDeleteQuery($notUsed = true) {
         $sql="delete from tipo_compras where tcId=?";
         if ($notUsed === true) {
             $sql .= ' AND tcId NOT IN (SELECT DISTINCT tcId FROM compras)';
         }
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($tc->getId()));
-        return ($consulta->rowCount() > 0) ? $tc->getId() : null;
+        return $sql;
     }
-    public function findById($id) {
-        $consulta = $this->getBD()->prepare("SELECT * FROM tipo_compras WHERE tcId = ?");
-        $consulta->execute(array($id));
-        if($consulta->rowCount() > 0) {
-            $res= $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
-            return new TipoCompra($res['tcId'], $res['tcNombre']);
-        }
-        else {
-            return null;
-        }
+
+    protected function getFindParameter($criterio = null) {
+        return [$criterio];
+    }
+
+    protected function getFindQuery($criterio = null) {
+        return "select * from tipo_compras";        
+    }
+
+    protected function getFindXIdQuery() {
+        return "SELECT * FROM tipo_compras WHERE tcId = ?";
+    }
+
+    protected function getUpdateParameter($object) {
+        return array($object->getNombre(),$object->getId());
+    }
+
+    protected function getUpdateQuery() {
+        return "update tipo_compras set tcNombre=? where tcId=?";
     }
 }

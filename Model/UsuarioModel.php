@@ -1,7 +1,5 @@
 <?php
 namespace Model;
-use \PDO;
-use \App\Session;
 use \Clases\Usuario;
 class UsuarioModel extends AppModel
 {    
@@ -10,95 +8,90 @@ class UsuarioModel extends AppModel
         parent::__construct();
         $this->mod_r= new RolModel();
     }    
-    
-    public function create($usuario){
-        if($this->check($usuario->getNick())){
-            Session::set('msg', 'El usuario ya existe');
-            return null;
-        }
-        $sql="insert into usuarios(usuNick,usuPass,usuMail,usuNombre,usuApellido,rolId) values(?,?,?,?,?,?)";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(
-                array(
-                    $usuario->getNick(),$usuario->getPass(),$usuario->getCorreo(),
-                    $usuario->getNombre(),$usuario->getApellido(),$usuario->getRol()->getId()
-                )
-            );
-        return ($consulta->rowCount() > 0) ? $this->getBD()->lastInsertId() : null;
-    }
-    public function update($usuario){
-        $aux = $this->findById($usuario->getId()); 
-        if(!$usuario->equals($aux)){
-            if($this->check($usuario->getNombre())){
-                Session::set('msg', 'El usuario ya existe');
-                return null;
-            }        
-        }
-        $sql="update usuarios set usuNick=?,usuPass=?,usuMail=?,usuNombre=?,usuApellido=?,rolId=? where usuId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(
-                array(
-                    $usuario->getNick(),$usuario->getPass(),$usuario->getCorreo(),
-                    $usuario->getNombre(),$usuario->getApellido(),$usuario->getRol()->getId(),
-                    $usuario->getId()
-                )
-            );
-        return ($consulta->rowCount() > 0) ? $usuario->getId() : null;
-    }
-    private function check($unique) { 
-        $query = 'SELECT usuId FROM usuarios WHERE usuNick = ?'; 
-        $consulta = $this->getBD()->prepare($query); 
-        $consulta->execute([$unique]); 
-        // Indicar si hay algo en la base de datos con este nombre 
-        return $consulta->rowCount() > 0; 
-    }
-    public function delete($usuario, $notUsed = true){
-        $sql="update usuarios set usuStatus=0 where usuId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($usuario->getId()));
-        return ($consulta->rowCount() > 0) ? $usuario->getId(): null;
-    }
     public function reactive($usuario){
-        $sql="update usuarios set usuStatus=1 where usuId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($usuario->getId()));
-        return ($consulta->rowCount() > 0) ? $usuario->getId() : null;
-    }
-    public function find($criterio = null){
-        $datos= array();        
-        $sql="SELECT * FROM usuarios u where u.usuNick like ?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array("%".$criterio."%"));
-        foreach($consulta->fetchAll(PDO::FETCH_ASSOC) as $row){
-            $rol= $this->mod_r->findById($row['rolId']);
-            $usuario = new Usuario($row['usuId'], $row['usuNick'], $row['usuPass'], $row['usuMail'], $row['usuNombre'],$row['usuApellido'], $row['usuStatus'], $rol);
-            array_push($datos,$usuario);
-        }
-        return $datos;
-    }
-    public function findById($id) {
-        $consulta = $this->getBD()->prepare("SELECT * FROM usuarios WHERE usuId = ?");
-        $consulta->execute(array($id));
-        if($consulta->rowCount() > 0) {
-            $res= $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
-            $rol= $this->mod_r->findById($res['rolId']);
-            return new Usuario($res['usuId'], $res['usuNick'], $res['usuPass'], $res['usuMail'], $res['usuNombre'], $res['usuApellido'], $res['usuStatus'], $rol);
-        }
-        else {
-            return null;
-        }
+        return $this->executeQuery(
+            "update usuarios set usuStatus=1 where usuId=?", 
+            array($usuario->getId())
+        );
     }
     public function findBylogin($load = array()){
-        $sql="select * from usuarios where usuNick = :user and usuPass = :pass and usuStatus = 1";
-        $consulta = $this->getBD()->prepare($sql);        
-        $consulta->execute(array('user' =>$load[0],'pass' => md5($load[1])));
-        if ($consulta->rowCount() > 0) {            
-            $res= $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
-            $rol= $this->mod_r->findById($res['rolId']);
-            return new Usuario($res['usuId'], $res['usuNick'], $res['usuPass'], $res['usuMail'], $res['usuNombre'], $res['usuApellido'], $res['usuStatus'], $rol);
-        }
-        else {
-            return null;
-        }
+        return $this->findByCondition(
+            "SELECT u.usuId as id, u.usuNick as nick, u.usuPass as pass, u.usuMail as mail, u.usuNombre as nom,"
+            . "u.usuApellido as ape, u.usuStatus as status, u.rolId as rol from usuarios u where "
+            . "u.usuNick = :user and u.usuPass = :pass and u.usuStatus = 1"
+            , 
+            array('user' =>$load[0],'pass' => md5($load[1]))
+        );
+    }
+    /*------------------------------------------------------------------*/
+    public function createEntity($row) {
+        $rol= $this->mod_r->findById($row['rol']);
+        $obj = new Usuario();
+        $obj->setId($row['id']);
+        $obj->setNick($row['nick']);
+        $obj->setPass($row['pass']);
+        $obj->setCorreo($row['mail']); 
+        $obj->setNombre($row['nom']); 
+        $obj->setApellido($row['ape']); 
+        $obj->setStatus($row['status']); 
+        $obj->setRol($rol); 
+        return $obj;        
+    }
+    /*------------------------------------------------------------------*/    
+    protected function getCheckMessage() {
+        return "El Usuario ya existe";
+    }
+
+    protected function getCheckParameter($unique) {
+        return [$unique->getNick()];
+    }
+
+    protected function getCheckQuery() {
+        return 'SELECT usuId FROM usuarios WHERE usuNick = ?';
+    }
+    /*------------------------------------------------------------------*/
+    protected function getCreateParameter($object) {
+        return array(
+            $object->getNick(),$object->getPass(),$object->getCorreo(),
+            $object->getNombre(),$object->getApellido(),$object->getRol()->getId()
+        );
+    }
+
+    protected function getCreateQuery() {
+        return "insert into usuarios(usuNick,usuPass,usuMail,usuNombre,usuApellido,rolId) values(?,?,?,?,?,?)";
+    }
+    /*------------------------------------------------------------------*/
+    protected function getDeleteParameter($object) {
+        return array($object->getId());
+    }
+
+    protected function getDeleteQuery($notUsed = true) {
+        return "update usuarios set usuStatus=0 where usuId=?";
+    }
+    /*------------------------------------------------------------------*/
+    protected function getFindParameter($criterio = null) {
+        return array("%".$criterio."%");
+    }
+
+    protected function getFindQuery($criterio = null) {
+        return "SELECT u.usuId as id, u.usuNick as nick, u.usuPass as pass, u.usuMail as mail, u.usuNombre as nom, "
+                . "u.usuApellido as ape, u.usuStatus as status, u.rolId as rol where u.usuNick like ?";
+    }
+    /*------------------------------------------------------------------*/
+    protected function getUpdateParameter($object) {
+        return array(
+            $object->getNick(),$object->getPass(),$object->getCorreo(),
+            $object->getNombre(),$object->getApellido(),$object->getRol()->getId(),
+            $object->getId()
+        );
+    }
+    protected function getUpdateQuery() {
+        return "update usuarios set usuNick=?,usuPass=?,usuMail=?,usuNombre=?,usuApellido=?,rolId=? where usuId=?";
+    }
+    /*------------------------------------------------------------------*/
+    protected function getFindXIdQuery() {
+        return "SELECT u.usuId as id, u.usuNick as nick, u.usuPass as pass, u.usuMail as mail, "
+        . "u.usuNombre as nom, u.usuApellido as ape, u.usuStatus as status, u.rolId as rol "
+        . "from usuarios u WHERE u.usuId = ?";
     }    
 }

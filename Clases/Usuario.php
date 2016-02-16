@@ -12,7 +12,6 @@ class Usuario implements IPersiste
     private $apellido;
     private $status;
     private $rol;
-    private $modelo;
     function getId() {
         return $this->id;
     }
@@ -37,6 +36,9 @@ class Usuario implements IPersiste
     function getRol() {
         return $this->rol;
     }
+    function setId($id) {
+        $this->id = $id;
+    }
     function setNick($nick) {
         $this->nick = $nick;
     }
@@ -58,41 +60,26 @@ class Usuario implements IPersiste
     function setRol($rol) {
         $this->rol = $rol;
     }
-    function __construct($xid = 0, $xnick = null, $xpass = null, $xcorreo = null, $xnombre = null, $xapellido = null, $xstatus = null, $xrol = null) {
-        $this->id = $xid;
-        $this->nick = $xnick;
-        $this->pass = $xpass;
-        $this->correo = $xcorreo;
-        $this->nombre = strtoupper($xnombre);
-        $this->apellido = strtoupper($xapellido);
-        $this->status = $xstatus;
-        $this->rol = $xrol;
-    }
+    function __construct() { }
     public function equals(Usuario $obj){
         return $this->nick == $obj->nick;                
     }  
     public function save(){
-        $this->modelo = new UsuarioModel();
-        return ($this->id == 0) ? $this->modelo->create($this) : $this->modelo->update($this); 
+        return ($this->id == 0) ? (new UsuarioModel())->create($this) : (new UsuarioModel())->update($this); 
     }
     public function del(){
-        $this->modelo = new UsuarioModel();
-        return $this->modelo->delete($this);
+        return (new UsuarioModel())->delete($this);
     }
     public function rec(){
-        $this->modelo = new UsuarioModel();
-        return $this->modelo->reactive($this);
+        return (new UsuarioModel())->reactive($this);
     }
     public function find($criterio = null){
-        $this->modelo = new UsuarioModel();
-        return $this->modelo->find($criterio); 
+        return (new UsuarioModel())->find($criterio); 
     }
     public function findById($id){
-        $this->modelo = new UsuarioModel();
-        return $this->modelo->findById($id);
+        return (new UsuarioModel())->findById($id);
     }
     public function findByLogin($dates = array()){
-        $this->modelo = new UsuarioModel();
-        return $this->modelo->findBylogin($dates);
+        return (new UsuarioModel())->findBylogin($dates);
     }
 }

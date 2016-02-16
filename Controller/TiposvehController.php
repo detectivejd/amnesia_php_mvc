@@ -18,10 +18,10 @@ class TiposvehController extends AppController
         if($this->checkUser()){
             if (isset($_POST['btnaceptar'])) {
                 if($this->checkDates()) {  
-                    $tv = new TipoVehiculo(0, $_POST['txtnom']);
+                    $tv = $this->createEntity();
                     $id = $tv->save();
                     Session::set("msg",(isset($id)) ? "Tipo de Vehículo Creado" : Session::get('msg'));
-                    header("Location:index.php?c=tiposveh&a=index");
+                    header("Location:index.php?b=backend&c=tiposveh&a=index");
                     exit();
                 }
             }            
@@ -33,10 +33,10 @@ class TiposvehController extends AppController
             Session::set("id",$_GET['p']);
             if (Session::get('id')!=null && isset($_POST['btnaceptar'])){ 
                 if($this->checkDates()) {         
-                    $tv = new TipoVehiculo($_POST['hid'], $_POST['txtnom']);
+                    $tv = $this->createEntity();
                     $id = $tv->save();
                     Session::set("msg",(isset($id)) ? "Tipo de Vehículos Editado" : Session::get('msg'));
-                    header("Location:index.php?c=tiposveh&a=index");
+                    header("Location:index.php?b=backend&c=tiposveh&a=index");
                     exit();
                 }
             }
@@ -51,7 +51,7 @@ class TiposvehController extends AppController
                 $tv = (new TipoVehiculo())->findById($_GET['p']); 
                 $id = $tv->del($tv);
                 Session::set("msg", (isset($id)) ? "Tipo de Vehículo Borrado" : "No se pudo borrar el tipo");
-                header("Location:index.php?c=tiposveh&a=index");
+                header("Location:index.php?b=backend&c=tiposveh&a=index");
             }                            
         }
     }
@@ -69,5 +69,11 @@ class TiposvehController extends AppController
     }
     protected function getTypeRole() {
         return "ADMIN";
+    }
+    protected function createEntity() {        
+        $obj = new TipoVehiculo();
+        $obj->setId(isset($_POST['hid']) ? $_POST['hid'] : 0);
+        $obj->setNombre($_POST['txtnom']);
+        return $obj;
     }
 }

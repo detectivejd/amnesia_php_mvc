@@ -33,15 +33,12 @@ class ComprasController extends AppController
             $vehiculos = (Session::get('veh')!="") ? (new Compra())->findByVeh(Session::get('veh')) : array();
             if(isset($_POST['btnaceptar'])){
                 if($this->checkDates()) {
-                    $tipo =  (new TipoCompra())->findById($_POST['txttipcom']);
-                    $user = (new Usuario())->findById($_POST['txtcli']);
-                    $veh = (new Vehiculo())->findById($_POST['txtveh']); 
-                    $com = new Compra(0, $_POST['dtfecha'], $this->checkTypeCuota($tipo), $_POST['txtcant'], $tipo, $user, $veh);
+                    $com = $this->createEntity();
                     $com->save();
-                    $veh->quitarStock($com->getCant());
-                    $veh->save();
+                    $com->getVeh()->quitarStock($com->getCant());
+                    $com->getVeh()->save();
                     Session::set("msg","Compra Creada");
-                    header("Location:index.php?c=compras&a=index");
+                    header("Location:index.php?b=backend&c=compras&a=index");
                     exit();
                 }
             }
@@ -63,15 +60,12 @@ class ComprasController extends AppController
             $vehiculos = (Session::get('veh')!="") ? (new Compra())->findByVeh(Session::get('veh')) : array();
             if (Session::get('id')!=null && isset($_POST['btnaceptar'])){
                  if($this->checkDates()) {
-                    $tipo =  (new TipoCompra())->findById($_POST['txttipcom']);
-                    $user = (new Usuario())->findById($_POST['txtcli']);
-                    $veh = (new Vehiculo())->findById($_POST['txtveh']); 
-                    $com = new Compra($_POST['hid'], $_POST['dtfecha'], $this->checkTypeCuota($tipo), $_POST['txtcant'], $tipo, $user, $veh);
+                    $com = $this->createEntity();
                     $com->save();
-                    $veh->quitarStock($com->getCant());
-                    $veh->save();
+                    $com->getVeh()->quitarStock($com->getCant());
+                    $com->getVeh()->save();
                     Session::set("msg","Compra Editada");
-                    header("Location:index.php?c=compras&a=index");
+                    header("Location:index.php?b=backend&c=compras&a=index");
                     exit();
                  }
             }
@@ -116,5 +110,19 @@ class ComprasController extends AppController
     }
     protected function getTypeRole() {
         return "ADMIN";
+    }
+    public function createEntity() {
+        $tipo =  (new TipoCompra())->findById($_POST['txttipcom']);
+        $user = (new Usuario())->findById($_POST['txtcli']);
+        $veh = (new Vehiculo())->findById($_POST['txtveh']); 
+        $obj = new Compra();
+        $obj->setId((isset($_POST['hid']) ? $_POST['hid'] : 0));
+        $obj->setFecha($_POST['dtfecha']);
+        $obj->setCuotas($this->checkTypeCuota($tipo));
+        $obj->setCant($_POST['txtcant']);
+        $obj->setTipo($tipo);
+        $obj->setUser($user);
+        $obj->setVeh($veh);
+        return $obj;
     }
 }

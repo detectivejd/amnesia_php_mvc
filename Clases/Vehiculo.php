@@ -13,7 +13,6 @@ class Vehiculo implements IPersiste
     private $status;
     private $modelo;
     private $tipo;
-    private $xmodelo;
     function getId() {
         return $this->id;
     }
@@ -68,17 +67,7 @@ class Vehiculo implements IPersiste
     function setTipo($tipo) {
         $this->tipo = $tipo;
     }
-    function __construct($xid = 0, $xmat = null, $xprecio = null, $xcant = null, $xdescrip = null, $xfoto = null, $xstatus = null, $xmodelo = null, $xtipo = null) {
-        $this->id = $xid;
-        $this->mat = $xmat;
-        $this->precio = $xprecio;
-        $this->cant = $xcant;
-        $this->descrip = strtoupper($xdescrip);
-        $this->foto = $xfoto;
-        $this->status = $xstatus;
-        $this->modelo = $xmodelo;
-        $this->tipo = $xtipo;
-    }
+    function __construct() { }
     public function equals(Vehiculo $obj){
         return $this->mat == $obj->mat;                
     }
@@ -91,31 +80,24 @@ class Vehiculo implements IPersiste
         return $this->cant >0;
     }
     public function save(){
-        $this->xmodelo = new VehiculoModel();
-        return ($this->id == 0) ? $this->xmodelo->create($this) : $this->xmodelo->update($this); 
+        return ($this->id == 0) ? (new VehiculoModel())->create($this) : (new VehiculoModel())->update($this); 
     }
     public function saveImg(){
-        $this->xmodelo = new VehiculoModel();
-        $this->xmodelo->updateImg($this);
+        (new VehiculoModel())->updateImg($this);
     }
     public function del(){
-        $this->xmodelo = new VehiculoModel();
-        return $this->xmodelo->eliminame($this);
+        return (new VehiculoModel())->delete($this);
     }
     public function rec(){
-        $this->xmodelo = new VehiculoModel();
-        return $this->xmodelo->reactive($this);
+        return (new VehiculoModel())->reactive($this);
     }
     public function find($criterio = null){
-        $this->xmodelo = new VehiculoModel();
-        return $this->xmodelo->find($criterio); 
+        return (new VehiculoModel())->find($criterio); 
     }
     public function findById($id){
-        $this->xmodelo = new VehiculoModel();
-        return $this->xmodelo->findById($id);
+        return (new VehiculoModel())->findById($id);
     }
     public function findByModelos($criterio){
-        $this->xmodelo = new VehiculoModel();
-        return $this->xmodelo->findByModelos($criterio); 
+        return (new VehiculoModel())->findByModelos($criterio); 
     }
 }

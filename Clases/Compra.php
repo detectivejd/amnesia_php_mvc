@@ -12,7 +12,6 @@ class Compra implements IPersiste
     private $user;
     private $veh;
     private $pagos;
-    private $modelo;
     function getId() {
         return $this->id;
     }
@@ -37,6 +36,9 @@ class Compra implements IPersiste
     function getPagos() {
         return $this->pagos;
     }
+    function setId($id) {
+        $this->id = $id;
+    }
     function setFecha($fecha) {
         $this->fecha = $fecha;
     }
@@ -58,15 +60,7 @@ class Compra implements IPersiste
     function setPagos($pagos) {
         $this->pagos = $pagos;
     }
-    function __construct($xid = 0, $xfecha = null, $xcuotas = null, $xcant = null, $xtipo = null, $xuser = null, $xveh = null) {
-        $this->id = $xid;
-        $this->fecha = $xfecha;
-        $this->cuotas = $xcuotas;
-        $this->cant = $xcant;
-        $this->tipo = $xtipo;
-        $this->user = $xuser;
-        $this->veh = $xveh;
-        $this->pagos = array();
+    function __construct() {
     }
     public function obtenerPagoTotal(){
         return $this->veh->getPrecio() * $this->cant;
@@ -75,12 +69,10 @@ class Compra implements IPersiste
         return $this->obtenerPagoTotal() / $this->cuotas;
     }
     public function obtenerCuotasRestantes(){
-        $this->modelo = new CompraModel();
-        return $this->cuotas - $this->modelo->find_sum_cuotas($this->id);
+        return $this->cuotas - (new CompraModel())->find_sum_cuotas($this->id);
     }
     public function obtenerCuotasPagadas(){
-        $this->modelo = new CompraModel();
-        return ($this->modelo->find_sum_cuotas($this->id) > 0) ? $this->modelo->find_sum_cuotas($this->id) : 0;
+        return ((new CompraModel())->find_sum_cuotas($this->id) > 0) ? (new CompraModel())->find_sum_cuotas($this->id) : 0;
     }
     public function generarFecVenc(){
         if($this->cuotas == $this->find_max_pago()){ 
@@ -106,44 +98,34 @@ class Compra implements IPersiste
     }
     
     public function save(){
-        $this->modelo = new CompraModel();
-        return ($this->id == 0) ? $this->modelo->create($this) : $this->modelo->update($this); 
+        return ($this->id == 0) ? (new CompraModel())->create($this) : (new CompraModel())->update($this); 
     }
     public function find($criterio = null){
-        $this->modelo = new CompraModel();
-        return $this->modelo->find($criterio); 
+        return (new CompraModel())->find($criterio); 
     }
     public function findById($id){
-        $this->modelo = new CompraModel();
-        return $this->modelo->findById($id);
+        return (new CompraModel())->findById($id);
     }
     public function findByClientes($criterio){
-        $this->modelo = new CompraModel();
-        return $this->modelo->findByClientes($criterio);
+        return (new CompraModel())->findByClientes($criterio);
     }
     public function findByVeh($criterio){
-        $this->modelo = new CompraModel();
-        return $this->modelo->findByVeh($criterio);
+        return (new CompraModel())->findByVeh($criterio);
     }
     public function add_pago($pago){
-        $this->modelo = new CompraModel();
-        return $this->modelo->add_pago($this,$pago);
+        return (new CompraModel())->add_pago($this,$pago);
     }
     public function del_pago($pago){
-        $this->modelo = new CompraModel();
-        return $this->modelo->del_pago($this,$pago);
+        return (new CompraModel())->del_pago($this,$pago);
     }
     public function find_pago($pago_id){
-        $this->modelo = new CompraModel();
-        return $this->modelo->find_pago($this->id, $pago_id);
+        return (new CompraModel())->find_pago($this->id, $pago_id);
     }
     public function find_max_pago(){
-        $this->modelo = new CompraModel();
-        return $this->modelo->find_max_pago($this->id);
+        return (new CompraModel())->find_max_pago($this->id);
     }
     public function check_fec_venc(){  
-        $this->modelo = new CompraModel();
-        return $this->modelo->check_fec_venc($this->id);
+        return (new CompraModel())->check_fec_venc($this->id);
     }
     public function del() { }
 }

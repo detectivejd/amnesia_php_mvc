@@ -1,72 +1,55 @@
 <?php
 namespace Model;
-use \PDO;
-use \App\Session;
 use \Clases\Rol;
 class RolModel extends AppModel
 {
     function __construct() {
         parent::__construct();
     }
-    public function find($criterio = null){
-        $sql="select * from roles";
-        $datos= array();
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute();
-        foreach($consulta->fetchAll(PDO::FETCH_ASSOC) as $row){
-            $rol = new Rol($row['rolId'], $row['rolNombre']);
-            array_push($datos, $rol);
-        }
-        return $datos;
+    protected function getCreateParameter($object) {
+        return array($object->getNombre());
     }
-    public function create($rol){
-        if($this->check($rol->getNombre())){
-            Session::set('msg', 'El rol ya existe');
-            return null;
-        }
-        $sql="insert into roles(rolNombre) values(?)";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($rol->getNombre()));
-        return ($consulta->rowCount() > 0) ? $this->getBD()->lastInsertId() : null;
+    protected function getCreateQuery() {
+        return "insert into roles(rolNombre) values(?)";
     }
-    public function update($rol){
-        $aux = $this->findById($rol->getId()); 
-        if(!$rol->equals($aux)){
-            if($this->check($rol->getNombre())){
-                Session::set('msg', 'El rol ya existe');
-                return null;
-            }        
-        }
-        $sql="update roles set rolNombre=? where rolId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($rol->getNombre(),$rol->getId()));
-        return ($consulta->rowCount() > 0) ? $rol->getId() : null;
+    protected function getUpdateQuery(){
+        return "update roles set rolNombre=? where rolId=?";
     }
-    private function check($unique) { 
-        $query = 'SELECT rolId FROM roles WHERE rolNombre = ?'; 
-        $consulta = $this->getBD()->prepare($query); 
-        $consulta->execute([$unique]); 
-        // Indicar si hay algo en la base de datos con este nombre 
-        return $consulta->rowCount() > 0; 
+    protected function getUpdateParameter($object){
+        return array($object->getNombre(),$object->getId());
     }
-    public function delete($rol, $notUsed = true) {
+    protected function getCheckMessage() {
+        return "El Rol ya Existe";
+    }
+    protected function getCheckParameter($unique) {
+        return [$unique->getNombre()];
+    }
+    protected function getCheckQuery() {
+        return 'SELECT rolId FROM roles WHERE rolNombre = ?'; 
+    }
+    public function createEntity($row) {
+        $obj = new Rol();
+        $obj->setId($row['rolId']);
+        $obj->setNombre($row['rolNombre']);
+        return $obj;
+    }
+    protected function getFindXIdQuery() {
+        return "SELECT * FROM roles WHERE rolId = ?";
+    }
+    protected function getFindParameter($criterio = null) {
+        return [$criterio];
+    }
+    protected function getFindQuery($criterio = null) {
+        return "select * from roles";
+    }
+    protected function getDeleteParameter($object) {
+        return array($object->getId());
+    }
+    protected function getDeleteQuery($notUsed = true) {
         $sql = "DELETE FROM roles WHERE rolId = ?";
         if ($notUsed === true) {
             $sql .= ' AND rolId NOT IN (SELECT DISTINCT rolId FROM usuarios)';
         }
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($rol->getId()));
-        return ($consulta->rowCount() > 0) ? $rol->getId() : null;
-    }
-    public function findById($id) {
-        $consulta = $this->getBD()->prepare("SELECT * FROM roles WHERE rolId = ?");
-        $consulta->execute(array($id));
-        if($consulta->rowCount() > 0) {
-            $res= $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
-            return new Rol($res['rolId'], $res['rolNombre']);
-        }
-        else {
-            return null;
-        }
+        return $sql;
     }
 }

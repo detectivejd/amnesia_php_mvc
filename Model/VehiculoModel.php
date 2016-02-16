@@ -1,109 +1,104 @@
 <?php
 namespace Model;
-use \PDO;
-use \App\Session;
-use \Clases\Modelo;
 use \Clases\Vehiculo;
 class VehiculoModel extends AppModel
 {
     private $mod_tv;
-    private $mod_mar;
     private $mod_mod;
     function __construct() {
         parent::__construct();
         $this->mod_tv = new TipovehModel();
-        $this->mod_mar = new MarcaModel();
         $this->mod_mod = new ModeloModel();
     }  
-    public function find($criterio = null){
-        $datos= array();
-        if($criterio == null){
-            $consulta = $this->getBD()->prepare("select * from vehiculos");
-            $consulta->execute();
-        }else {
-            $consulta = $this->getBD()->prepare("select * from vehiculos where vehMatricula like ?");
-            $consulta->execute(array("%".$criterio."%"));
-        }        
-        foreach($consulta->fetchAll(PDO::FETCH_ASSOC) as $row){
-            $tipo = $this->mod_tv->findById($row['tvId']); 
-            $modelo = $this->mod_mod->findById($row['modId']);
-            $veh = new Vehiculo($row['vehId'], $row['vehMatricula'], $row['vehPrecio'], $row['vehCantidad'], $row['vehDescrip'],$row['vehFoto'],$row['vehStatus'], $modelo, $tipo);
-            array_push($datos, $veh);
-        }
-        return $datos;
-    }
-    public function findById($id){
-        $consulta = $this->getBD()->prepare("select * from vehiculos WHERE vehId = ?");
-        $consulta->execute(array($id));
-        if($consulta->rowCount() > 0) {
-            $res = $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
-            $tipo = $this->mod_tv->findById($res['tvId']); 
-            $modelo = $this->mod_mod->findById($res['modId']);
-            return new Vehiculo($res['vehId'], $res['vehMatricula'], $res['vehPrecio'], $res['vehCantidad'], $res['vehDescrip'],$res['vehFoto'],$res['vehStatus'], $modelo, $tipo);
-        }
-        else {
-            return null;
-        }
-    }
     public function findByModelos($criterio){
         $datos= array();
-        $sql="select * from modelos where modNombre like ? limit 0,10";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array("%".$criterio."%"));
-        foreach($consulta->fetchAll(PDO::FETCH_ASSOC) as $row){
-            $marca = $this->mod_mar->findById($row['marId']);
-            $modelo = new Modelo($row['modId'], $row['modNombre'],$marca);
+        $consulta = $this->fetch(
+            "select * from modelos where modNombre like ? limit 0,10", 
+            array("%".$criterio."%")
+        );
+        foreach($consulta as $row){
+            $modelo = $this->mod_mod->createEntity($row); 
             array_push($datos,$modelo);
         }
         return $datos;
     }
-    public function create($veh){
-        if($this->check($veh->getMat())){
-            Session::set('msg', 'El vehículo ya existe');
-            return null;
-        }
-        $sql="insert into vehiculos(vehMatricula,vehPrecio,vehCantidad,vehDescrip,vehFoto,modId,tvId) values(?,?,?,?,?,?,?)";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($veh->getMat(),$veh->getPrecio(),$veh->getCant(),$veh->getDescrip(),$veh->getFoto(),$veh->getModelo()->getId(),$veh->getTipo()->getId()));
-        return ($consulta->rowCount() > 0) ? $this->getBD()->lastInsertId() : null;
-    }
-    public function update($veh){
-        $aux = $this->findById($veh->getId()); 
-        if(!$veh->equals($aux)){
-            if($this->check($veh->getMat())){
-                Session::set('msg', 'El vehículo ya existe');
-                return null;
-            }        
-        }
-        $sql="update vehiculos set vehMatricula=?,vehPrecio=?,vehCantidad=?,vehDescrip=?,modId=?,tvId=? where vehId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($veh->getMat(),$veh->getPrecio(),$veh->getCant(),$veh->getDescrip(),$veh->getModelo()->getId(),$veh->getTipo()->getId(),$veh->getId()));
-        return ($consulta->rowCount() > 0) ? $veh->getId() : null;
-    }
-    private function check($unique) { 
-        $query = 'SELECT vehId FROM vehiculos WHERE vehMatricula = ?'; 
-        $consulta = $this->getBD()->prepare($query); 
-        $consulta->execute([$unique]); 
-        // Indicar si hay algo en la base de datos con este nombre 
-        return $consulta->rowCount() > 0; 
-    }
     public function updateImg($veh){
-        $sql="update vehiculos set vehFoto=? where vehId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($veh->getFoto(),$veh->getId()));
-        return ($consulta->rowCount() > 0) ? $veh->getId() : null;
+        return $this->executeQuery(
+            "update vehiculos set vehFoto=? where vehId=?", 
+            array($veh->getFoto(),$veh->getId())
+        );
     }
-    public function delete($veh,$notUsed = true){
-        $sql="update vehiculos set vehStatus=0 where vehId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($veh->getId()));
-        return ($consulta->rowCount() > 0) ? $veh->getId() : null;
-    }   
     public function reactive($veh){
-        $sql="update vehiculos set vehStatus=1 where vehId=?";
-        $consulta = $this->getBD()->prepare($sql);
-        $consulta->execute(array($veh->getId()));
-        return ($consulta->rowCount() > 0) ? $veh->getId() : null;
+        return $this->executeQuery(
+            "update vehiculos set vehStatus=1 where vehId=?", 
+            array($veh->getId())
+        );        
     }
-        
+    public function createEntity($row) {
+        $tipo = $this->mod_tv->findById($row['tvId']); 
+        $modelo = $this->mod_mod->findById($row['modId']);
+        $obj = new Vehiculo();
+        $obj->setId($row['vehId']);
+        $obj->setMat($row['vehMatricula']);
+        $obj->setPrecio($row['vehPrecio']);
+        $obj->setCant($row['vehCantidad']);
+        $obj->setDescrip($row['vehDescrip']);
+        $obj->setFoto($row['vehFoto']);
+        $obj->setStatus($row['vehStatus']);
+        $obj->setModelo($modelo);
+        $obj->setTipo($tipo);
+        return $obj;
+    }
+
+    protected function getCheckMessage() {
+        return "El Vehículo ya existe";
+    }
+    protected function getCheckParameter($unique) {
+        return [$unique->getMat()];
+    }
+    protected function getCheckQuery() {
+        return 'SELECT vehId FROM vehiculos WHERE vehMatricula = ?';
+    }
+
+    protected function getCreateParameter($object) {
+        return array(
+            $object->getMat(),$object->getPrecio(),$object->getCant(),$object->getDescrip(),
+            $object->getFoto(),$object->getModelo()->getId(),$object->getTipo()->getId()
+        );
+    }
+
+    protected function getCreateQuery() {
+        return "insert into vehiculos(vehMatricula,vehPrecio,vehCantidad,vehDescrip,vehFoto,modId,tvId) values(?,?,?,?,?,?,?)";
+    }
+
+    protected function getDeleteParameter($object) {
+        return array($object->getId());
+    }
+
+    protected function getDeleteQuery($notUsed = true) {
+        return "update vehiculos set vehStatus=0 where vehId=?";
+    }
+
+    protected function getFindParameter($criterio = null) {
+        return array("%".$criterio."%");
+    }
+
+    protected function getFindQuery($criterio = null) {
+        return ($criterio == null) ? "select * from vehiculos" : "select * from vehiculos where vehMatricula like ?";
+    }
+
+    protected function getFindXIdQuery() {
+        return "select * from vehiculos WHERE vehId = ?";
+    }
+
+    protected function getUpdateParameter($object) {
+        return array(
+            $object->getMat(),$object->getPrecio(),$object->getCant(),$object->getDescrip(),
+            $object->getModelo()->getId(),$object->getTipo()->getId(),$object->getId()
+        );
+    }
+
+    protected function getUpdateQuery() {
+        return "update vehiculos set vehMatricula=?,vehPrecio=?,vehCantidad=?,vehDescrip=?,modId=?,tvId=? where vehId=?";
+    }    
 }
