@@ -1,11 +1,22 @@
 <h3>Mostrar Compras por período</h3>
+<script type="text/javascript"> 
+//<![CDATA[
+function procesar(v){
+    document.getElementById('envia').href = 'index.php?c=pdf&a=c1&p='+v;
+}
+function procesar2(){
+    document.elform.submit();
+}
+//]]>
+</script>
 <p>
     <a href="index.php?c=consultas&a=index" title="Volver"><img src="Public/img/go_previous.png" /></a>
     <form action="index.php?c=consultas&a=cons1" method="post" name="frmcons1">
-        <input type="radio" name="rbtnperiodo" value="d" /><b>Día</b>&nbsp;
-        <input type="radio" name="rbtnperiodo" value="m" /><b>Mes</b>&nbsp;
-        <input type="radio" name="rbtnperiodo" value="a" /><b>Año</b>&nbsp;
-        <input type="button" name="btnaceptar" value="Aceptar" onclick="frmcons1.submit();" />
+        <input type="radio" name="rbtnperiodo" value="d" onclick="procesar(this.value);" /><b>Día</b>&nbsp;
+        <input type="radio" name="rbtnperiodo" value="m" onclick="procesar(this.value);" /><b>Mes</b>&nbsp;
+        <input type="radio" name="rbtnperiodo" value="a" onclick="procesar(this.value);" /><b>Año</b>&nbsp;
+        <input type="button" name="btnaceptar" value="Aceptar" onclick="frmcons1.submit();" />&nbsp;
+        <a href="#" onclick="procesar2();" id="envia" target="_blank"><input type="button" name="btnpdf" value="Pdf" /></a>
     </form>
 </p>
 <table class="table1">

@@ -75,7 +75,7 @@ class UsuarioModel extends AppModel
 
     protected function getFindQuery($criterio = null) {
         return "SELECT u.usuId as id, u.usuNick as nick, u.usuPass as pass, u.usuMail as mail, u.usuNombre as nom, "
-                . "u.usuApellido as ape, u.usuStatus as status, u.rolId as rol where u.usuNick like ?";
+                . "u.usuApellido as ape, u.usuStatus as status, u.rolId as rol from usuarios u where u.usuNick like ?";
     }
     /*------------------------------------------------------------------*/
     protected function getUpdateParameter($object) {

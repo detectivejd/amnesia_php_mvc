@@ -1,6 +1,7 @@
 <h3>Mostrar Mis Compras y Pagos</h3>
 <p>
-    <a href="index.php?c=consultas&a=index" title="Volver"><img src="Public/img/go_previous.png" /></a>
+    <a href="index.php?c=consultas&a=index" title="Volver"><img src="Public/img/go_previous.png" /></a>&nbsp;
+    <a href="index.php?c=pdf&a=c4" target="_blank" title="Ver como pdf"><img src="Public/img/printer.png" /></a>
 </p>
 <?php foreach($compras as $compra){?>
     <p>
@@ -30,4 +31,3 @@
         </details>
     </p>
 <?php } ?>
-

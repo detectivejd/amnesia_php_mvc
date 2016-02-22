@@ -1,6 +1,7 @@
 <h3>Mostrar Compras sin pagar</h3>
 <p>
-    <a href="index.php?c=consultas&a=index" title="Volver"><img src="Public/img/go_previous.png" /></a>    
+    <a href="index.php?c=consultas&a=index" title="Volver"><img src="Public/img/go_previous.png" /></a>&nbsp;
+    <a href="index.php?c=pdf&a=c2" target="_blank" title="Ver como pdf"><img src="Public/img/printer.png" /></a>
 </p>
 <table class="table1">
     <thead>
